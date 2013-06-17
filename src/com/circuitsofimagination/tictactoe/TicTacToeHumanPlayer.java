@@ -41,7 +41,7 @@ public class TicTacToeHumanPlayer implements TicTacToePlayer {
 		Location move = null;
 		
 		// Keep trying until the user click on a valid location
-		while(move == null) {
+		while((move == null) || (game.board.cellAt(move) != Cell.EMPTY)) {
 			move = getMove();
 		}
 		
@@ -66,7 +66,6 @@ public class TicTacToeHumanPlayer implements TicTacToePlayer {
 			exc.printStackTrace();
 		} finally {
 			bufferLock.release();
-			emptyLock.release();
 		}
 		return l;
 	}

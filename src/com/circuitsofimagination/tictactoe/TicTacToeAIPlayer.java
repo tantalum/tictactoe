@@ -35,7 +35,7 @@ public class TicTacToeAIPlayer implements TicTacToePlayer {
 		for(Location l : possibleLocations) {
 			currentBoard = game.board.copy();
 			currentBoard.makeMove(team, l);
-			thisScore = min(currentBoard);
+			thisScore = scoreMove(currentBoard, TicTacToeBoard.oppositePlayer(team), -1);
 			if(thisScore >= bestScore) {
 				bestScore = thisScore;
 				bestMove = l;
@@ -45,55 +45,29 @@ public class TicTacToeAIPlayer implements TicTacToePlayer {
 		return bestMove;
 	}
 	
-
-		
-	private float min(TicTacToeBoard board)throws TicTacToeException {
-		float minScore = 1;
-
-		Cell winner = board.winner();
-		if(winner != null) {
-			return evaluateWinner(winner);
-		}
-		
-		List<Location> possibleMoves = board.emptySlots();
-		float thisScore;
-		TicTacToeBoard currentBoard;
-		//TODO: We have three copies of almost the same loop
-		// Find a way to combine them
-		// aka: DRY
-		for(Location l : possibleMoves) {
-			currentBoard = board.copy();
-			currentBoard.makeMove(TicTacToeBoard.oppositePlayer(team), l);
-			thisScore = max(currentBoard);
-			if(thisScore <= minScore) {
-				minScore = thisScore;
-			}
-		}
-		return minScore;
-	}
-	
-	private float max(TicTacToeBoard board) throws TicTacToeException {
+	private float scoreMove(TicTacToeBoard board, Cell thisTeam, float multiplyer) throws TicTacToeException {
 		float maxScore = -1;
-		
+	
 		Cell winner = board.winner();
 		if(winner != null) {
 			return evaluateWinner(winner);
-		} 
+		}
 		
 		List<Location> possibleMoves = board.emptySlots();
 		float thisScore;
 		TicTacToeBoard currentBoard;
-		for(Location l : possibleMoves) {
+		
+		for(Location l: possibleMoves) {
 			currentBoard = board.copy();
-			currentBoard.makeMove(team, l);
-			thisScore = min(currentBoard);
+			currentBoard.makeMove(thisTeam, l);
+			thisScore = multiplyer*scoreMove(currentBoard, TicTacToeBoard.oppositePlayer(thisTeam), -1*multiplyer);
 			if(thisScore >= maxScore) {
 				maxScore = thisScore;
 			}
 		}
-		return maxScore;
+		return multiplyer*maxScore;
 	}
-	
+
 	private float evaluateWinner(Cell winner) {
 		if((winner == null) || (winner == Cell.EMPTY)) {
 			return 0;
@@ -103,5 +77,4 @@ public class TicTacToeAIPlayer implements TicTacToePlayer {
 			return -1;
 		}
 	}
-
 }

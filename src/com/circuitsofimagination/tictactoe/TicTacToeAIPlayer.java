@@ -23,19 +23,11 @@ public class TicTacToeAIPlayer implements TicTacToePlayer {
 		float bestScore = -1;
 		Location bestMove = null;
 		TicTacToeBoard currentBoard;
-		/*
-		 * Find the best move based on the minimax algorithm
-		 * http://en.wikipedia.org/wiki/Minimax
-		 * This is the first iteration, where on Max
-		 * We implement the first iteration here
-		 * so we can find the best move
-		 * instead of having min and max 
-		 * return both a score and location
-		 */	
+		
 		for(Location l : possibleLocations) {
 			currentBoard = game.board.copy();
 			currentBoard.makeMove(team, l);
-			thisScore = scoreMove(currentBoard, TicTacToeBoard.oppositePlayer(team), -1);
+			thisScore = minimax(currentBoard, TicTacToeBoard.oppositePlayer(team));
 			if(thisScore >= bestScore) {
 				bestScore = thisScore;
 				bestMove = l;
@@ -45,22 +37,34 @@ public class TicTacToeAIPlayer implements TicTacToePlayer {
 		return bestMove;
 	}
 	
-	private float scoreMove(TicTacToeBoard board, Cell thisTeam, float multiplyer) throws TicTacToeException {
-		float maxScore = -1;
-	
+	/*
+	 * Find the best move based on the minimax algorithm
+	 * http://en.wikipedia.org/wiki/Minimax
+	 * This is the first iteration, where on Max
+	 * We implement the first iteration here
+	 * so we can find the best move
+	 * instead of having min and max 
+	 * return both a score and location
+	 */	
+	private int minimax(TicTacToeBoard board, Cell thisTeam) throws TicTacToeException {
+		int maxScore = -1;
+		int multiplyer = 1;
+		if(thisTeam != team) {
+			multiplyer = -1;
+		}
 		Cell winner = board.winner();
 		if(winner != null) {
 			return evaluateWinner(winner);
 		}
 		
 		List<Location> possibleMoves = board.emptySlots();
-		float thisScore;
+		int thisScore;
 		TicTacToeBoard currentBoard;
 		
 		for(Location l: possibleMoves) {
 			currentBoard = board.copy();
 			currentBoard.makeMove(thisTeam, l);
-			thisScore = multiplyer*scoreMove(currentBoard, TicTacToeBoard.oppositePlayer(thisTeam), -1*multiplyer);
+			thisScore = multiplyer*minimax(currentBoard, TicTacToeBoard.oppositePlayer(thisTeam));
 			if(thisScore >= maxScore) {
 				maxScore = thisScore;
 			}
@@ -68,7 +72,7 @@ public class TicTacToeAIPlayer implements TicTacToePlayer {
 		return multiplyer*maxScore;
 	}
 
-	private float evaluateWinner(Cell winner) {
+	private int evaluateWinner(Cell winner) {
 		if((winner == null) || (winner == Cell.EMPTY)) {
 			return 0;
 		} else if(winner == team) {
